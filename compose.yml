@@ -40,11 +40,14 @@ services:
       DB_NAME: postgres
       DATABASE_URL: postgresql://postgres@postgres:5432/postgres?schema=public
       PORT: 3000
+      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:-}
+      BUS_FARE_BRL: ${BUS_FARE_BRL:-5.00}
     ports:
       - '3000:3000'
     volumes:
       - ./src:/app/src
       - ./prisma:/app/prisma
+      - ./public:/app/public
       - ./.git:/app/.git
       - /app/node_modules
       - /app/dist
