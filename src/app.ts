@@ -1,10 +1,78 @@
-import express from 'express'
-import { Request, Response } from 'express'
+import 'dotenv/config'
+import express, { Request, Response } from 'express'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import prisma from './db.js'
+import { googleTransitRoute, mockRoute } from './maps.js'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const PUBLIC_DIR = path.resolve(__dirname, '../public')
+const PORT = Number(process.env.PORT) || 3000
+const FARE_BRL = Number(process.env.BUS_FARE_BRL) || 5.0
+const API_KEY = process.env.GOOGLE_MAPS_API_KEY
 
 const app = express()
 
-app.get('/', (req: Request, res: Response) => {
-    res.send('Hello World')
+app.use(express.json())
+app.use(express.static(PUBLIC_DIR))
+
+function formatAddress(r: { street: string; number: number; neighborhood: string; city: string }) {
+  return `${r.street}, ${r.number} — ${r.neighborhood}, ${r.city}`
+}
+
+app.get('/api/employees', async (_req: Request, res: Response) => {
+  const rows = await prisma.employee.findMany({ orderBy: { name: 'asc' } })
+  res.json(
+    rows.map((r) => ({
+      id: r.id,
+      name: r.name,
+      address: formatAddress(r),
+      lat: r.lat,
+      lng: r.lng,
+    })),
+  )
 })
 
-app.listen(3000)
+app.get('/api/works', async (_req: Request, res: Response) => {
+  const rows = await prisma.work.findMany({ orderBy: { name: 'asc' } })
+  res.json(
+    rows.map((r) => ({
+      id: r.id,
+      name: r.name,
+      address: formatAddress(r),
+      lat: r.lat,
+      lng: r.lng,
+    })),
+  )
+})
+
+app.get('/api/route', async (req: Request, res: Response) => {
+  const from = String(req.query.from || '')
+  const to = String(req.query.to || '')
+  if (!from || !to) {
+    return res.status(400).json({ error: 'from and to query params required' })
+  }
+  const [emp, work] = await Promise.all([
+    prisma.employee.findUnique({ where: { id: from } }),
+    prisma.work.findUnique({ where: { id: to } }),
+  ])
+  if (!emp || !work) return res.status(404).json({ error: 'employee or work not found' })
+  if (emp.lat == null || emp.lng == null || work.lat == null || work.lng == null) {
+    return res.status(422).json({ error: 'missing coordinates for employee or work' })
+  }
+
+  try {
+    const route = API_KEY
+      ? await googleTransitRoute(emp, work, API_KEY, FARE_BRL)
+      : mockRoute(emp, work, FARE_BRL)
+    res.json(route)
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('route error:', msg)
+    res.status(502).json({ error: msg, fallback: mockRoute(emp, work, FARE_BRL) })
+  }
+})
+
+app.listen(PORT, () => {
+  console.log(`server listening on :${PORT} (fare R$${FARE_BRL}, key=${API_KEY ? 'set' : 'mock'})`)
+})

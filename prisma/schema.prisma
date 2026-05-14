@@ -14,6 +14,8 @@ model employee {
   neighborhood String @db.VarChar(40)
   city String @db.VarChar(40)
   zip_code String @db.VarChar(10)
+  lat Float?
+  lng Float?
 }
 
 model work {
@@ -24,4 +26,6 @@ model work {
   neighborhood String @db.VarChar(40)
   city String @db.VarChar(40)
   zip_code String @db.VarChar(10)
+  lat Float?
+  lng Float?
 }

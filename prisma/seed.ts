@@ -8,6 +8,8 @@ const employees = [
     neighborhood: "Moinhos de Vento",
     city: "Porto Alegre",
     zip_code: "90570-080",
+    lat: -30.0250,
+    lng: -51.2010,
   },
   {
     name: "Rafael Silveira Machado",
@@ -16,6 +18,8 @@ const employees = [
     neighborhood: "Petrópolis",
     city: "Porto Alegre",
     zip_code: "90410-006",
+    lat: -30.0410,
+    lng: -51.1850,
   },
   {
     name: "Camila Pereira Fontes",
@@ -24,6 +28,8 @@ const employees = [
     neighborhood: "Passo d'Areia",
     city: "Porto Alegre",
     zip_code: "91010-002",
+    lat: -30.0030,
+    lng: -51.1730,
   },
   {
     name: "Lucas Almeida Rocha",
@@ -32,6 +38,8 @@ const employees = [
     neighborhood: "Tristeza",
     city: "Porto Alegre",
     zip_code: "91900-000",
+    lat: -30.1130,
+    lng: -51.2390,
   },
   {
     name: "Beatriz Cardoso Lima",
@@ -40,6 +48,8 @@ const employees = [
     neighborhood: "Partenon",
     city: "Porto Alegre",
     zip_code: "90650-002",
+    lat: -30.0590,
+    lng: -51.1700,
   },
   {
     name: "Henrique Borges Martins",
@@ -48,6 +58,8 @@ const employees = [
     neighborhood: "Higienópolis",
     city: "Porto Alegre",
     zip_code: "90520-003",
+    lat: -30.0140,
+    lng: -51.1980,
   },
   {
     name: "Patrícia Souza Vargas",
@@ -56,6 +68,8 @@ const employees = [
     neighborhood: "Sarandi",
     city: "Porto Alegre",
     zip_code: "91020-001",
+    lat: -29.9810,
+    lng: -51.1330,
   },
   {
     name: "Eduardo Nunes Ribeiro",
@@ -64,6 +78,8 @@ const employees = [
     neighborhood: "Mont'Serrat",
     city: "Porto Alegre",
     zip_code: "90450-001",
+    lat: -30.0260,
+    lng: -51.1900,
   },
 ]
 
@@ -75,6 +91,8 @@ const works = [
     neighborhood: "Praia de Belas",
     city: "Porto Alegre",
     zip_code: "90110-001",
+    lat: -30.0530,
+    lng: -51.2270,
   },
   {
     name: "Obra Residencial Auxiliadora",
@@ -83,6 +101,8 @@ const works = [
     neighborhood: "Auxiliadora",
     city: "Porto Alegre",
     zip_code: "90480-002",
+    lat: -30.0250,
+    lng: -51.1940,
   },
   {
     name: "Obra Comercial Centro Histórico",
@@ -91,6 +111,8 @@ const works = [
     neighborhood: "Centro Histórico",
     city: "Porto Alegre",
     zip_code: "90020-008",
+    lat: -30.0290,
+    lng: -51.2280,
   },
   {
     name: "Obra Condomínio Cidade Baixa",
@@ -99,6 +121,8 @@ const works = [
     neighborhood: "Cidade Baixa",
     city: "Porto Alegre",
     zip_code: "90040-001",
+    lat: -30.0410,
+    lng: -51.2230,
   },
   {
     name: "Obra Galpão Logístico Anchieta",
@@ -107,6 +131,8 @@ const works = [
     neighborhood: "Anchieta",
     city: "Porto Alegre",
     zip_code: "90200-310",
+    lat: -29.9760,
+    lng: -51.1750,
   },
   {
     name: "Obra Reforma Independência",
@@ -115,6 +141,8 @@ const works = [
     neighborhood: "Independência",
     city: "Porto Alegre",
     zip_code: "90035-077",
+    lat: -30.0270,
+    lng: -51.2030,
   },
   {
     name: "Obra Torre Floresta",
@@ -123,6 +151,8 @@ const works = [
     neighborhood: "Floresta",
     city: "Porto Alegre",
     zip_code: "90560-002",
+    lat: -30.0170,
+    lng: -51.2110,
   },
   {
     name: "Obra Empreendimento Boa Vista",
@@ -131,6 +161,8 @@ const works = [
     neighborhood: "Boa Vista",
     city: "Porto Alegre",
     zip_code: "91330-001",
+    lat: -30.0270,
+    lng: -51.1860,
   },
 ]
 
