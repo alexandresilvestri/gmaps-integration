@@ -2,6 +2,12 @@ import type { employee, work } from '@prisma/client'
 
 export type Coord = { lat: number; lng: number }
 
+export type MapShape = {
+  polyline: string
+  bounds: { ne: Coord; sw: Coord }
+  source: 'google' | 'mock'
+}
+
 export type RouteResponse = {
   straightKm: number
   transit: {
@@ -16,9 +22,11 @@ export type RouteResponse = {
   walk: { km: number; min: number }
   bike: { km: number; min: number }
   steps: Array<{ icon: string; text: string; dist: string; time: string }>
+  map: MapShape | null
 }
 
 const ROUTES_URL = 'https://routes.googleapis.com/directions/v2:computeRoutes'
+const DIRECTIONS_URL = 'https://maps.googleapis.com/maps/api/directions/json'
 
 const FIELD_MASK = [
   'routes.duration',
@@ -95,7 +103,46 @@ export function mockRoute(from: employee, to: work, fareBRL: number): RouteRespo
     },
     ...other,
     steps: mockSteps(from.street, to.name, transitKm, transitMin),
+    map: mockMapShape(from, to),
   }
+}
+
+export function mockMapShape(from: employee, to: work): MapShape {
+  const a: Coord = { lat: from.lat!, lng: from.lng! }
+  const b: Coord = { lat: to.lat!, lng: to.lng! }
+  return {
+    polyline: encodePolyline([a, b]),
+    bounds: {
+      ne: { lat: Math.max(a.lat, b.lat), lng: Math.max(a.lng, b.lng) },
+      sw: { lat: Math.min(a.lat, b.lat), lng: Math.min(a.lng, b.lng) },
+    },
+    source: 'mock',
+  }
+}
+
+function encodePolyline(points: Coord[]): string {
+  let result = ''
+  let prevLat = 0
+  let prevLng = 0
+  for (const p of points) {
+    const eLat = Math.round(p.lat * 1e5)
+    const eLng = Math.round(p.lng * 1e5)
+    result += encodeSignedValue(eLat - prevLat) + encodeSignedValue(eLng - prevLng)
+    prevLat = eLat
+    prevLng = eLng
+  }
+  return result
+}
+
+function encodeSignedValue(v: number): string {
+  let value = v < 0 ? ~(v << 1) : v << 1
+  let out = ''
+  while (value >= 0x20) {
+    out += String.fromCharCode((0x20 | (value & 0x1f)) + 63)
+    value >>>= 5
+  }
+  out += String.fromCharCode(value + 63)
+  return out
 }
 
 type RoutesApiStep = {
@@ -202,5 +249,40 @@ export async function googleTransitRoute(
     },
     ...other,
     steps,
+    map: null,
+  }
+}
+
+export async function googleDirectionsPolyline(
+  from: employee,
+  to: work,
+  apiKey: string,
+): Promise<MapShape> {
+  const params = new URLSearchParams({
+    origin: `${from.lat},${from.lng}`,
+    destination: `${to.lat},${to.lng}`,
+    mode: 'transit',
+    transit_mode: 'bus',
+    departure_time: 'now',
+    language: 'pt-BR',
+    region: 'br',
+    units: 'metric',
+    key: apiKey,
+  })
+  const res = await fetch(`${DIRECTIONS_URL}?${params.toString()}`)
+  if (!res.ok) throw new Error(`Directions HTTP ${res.status}`)
+  const data: any = await res.json()
+  if (data.status !== 'OK') {
+    throw new Error(`Directions ${data.status}: ${data.error_message ?? ''}`)
+  }
+  const r = data.routes?.[0]
+  if (!r) throw new Error('Directions returned no routes')
+  return {
+    polyline: r.overview_polyline.points,
+    bounds: {
+      ne: { lat: r.bounds.northeast.lat, lng: r.bounds.northeast.lng },
+      sw: { lat: r.bounds.southwest.lat, lng: r.bounds.southwest.lng },
+    },
+    source: 'google',
   }
 }

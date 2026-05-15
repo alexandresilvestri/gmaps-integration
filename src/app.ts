@@ -3,7 +3,7 @@ import express, { Request, Response } from 'express'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import prisma from './db.js'
-import { googleTransitRoute, mockRoute } from './maps.js'
+import { googleDirectionsPolyline, googleTransitRoute, mockMapShape, mockRoute } from './maps.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const PUBLIC_DIR = path.resolve(__dirname, '../public')
@@ -62,15 +62,27 @@ app.get('/api/route', async (req: Request, res: Response) => {
   }
 
   try {
-    const route = API_KEY
-      ? await googleTransitRoute(emp, work, API_KEY, FARE_BRL)
-      : mockRoute(emp, work, FARE_BRL)
-    res.json(route)
+    const [route, mapShape] = await Promise.all([
+      API_KEY
+        ? googleTransitRoute(emp, work, API_KEY, FARE_BRL)
+        : Promise.resolve(mockRoute(emp, work, FARE_BRL)),
+      API_KEY
+        ? googleDirectionsPolyline(emp, work, API_KEY).catch((err) => {
+            console.error('directions error:', err instanceof Error ? err.message : err)
+            return mockMapShape(emp, work)
+          })
+        : Promise.resolve(mockMapShape(emp, work)),
+    ])
+    res.json({ ...route, map: mapShape })
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
     console.error('route error:', msg)
     res.status(502).json({ error: msg, fallback: mockRoute(emp, work, FARE_BRL) })
   }
+})
+
+app.get('/api/config', (_req: Request, res: Response) => {
+  res.json({ mapsJsKey: process.env.GOOGLE_MAPS_JS_API_KEY || '' })
 })
 
 app.listen(PORT, () => {

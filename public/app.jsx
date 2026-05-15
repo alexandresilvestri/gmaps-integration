@@ -5,6 +5,7 @@ function App() {
   const [works, setWorks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
+  const [mapsJsKey, setMapsJsKey] = useState('');
 
   const [empId, setEmpId] = useState(null);
   const [siteId, setSiteId] = useState(null);
@@ -15,8 +16,8 @@ function App() {
   const [routeError, setRouteError] = useState(null);
 
   useEffect(() => {
-    Promise.all([window.api.fetchEmployees(), window.api.fetchWorks()])
-      .then(([emps, wks]) => { setEmployees(emps); setWorks(wks); })
+    Promise.all([window.api.fetchEmployees(), window.api.fetchWorks(), window.api.fetchConfig()])
+      .then(([emps, wks, cfg]) => { setEmployees(emps); setWorks(wks); setMapsJsKey(cfg.mapsJsKey || ''); })
       .catch(e => setLoadError(e.message))
       .finally(() => setLoading(false));
   }, []);
@@ -100,7 +101,7 @@ function App() {
       ) : routeError ? (
         <div style={appStyles.errorBanner}>Falha ao calcular trajeto: {routeError}</div>
       ) : ready ? (
-        <ResultPanel employee={employee} site={site} route={route} mode={mode} setMode={setMode} />
+        <ResultPanel employee={employee} site={site} route={route} mode={mode} setMode={setMode} mapsJsKey={mapsJsKey} />
       ) : null}
 
       <footer style={appStyles.footer} className="mono">
@@ -164,7 +165,7 @@ function EmptyState({ empSelected, siteSelected }) {
   );
 }
 
-function ResultPanel({ employee, site, route, mode, setMode }) {
+function ResultPanel({ employee, site, route, mode, setMode, mapsJsKey }) {
   const current = route[mode];
   const modes = [
     { id: 'transit', label: 'Ônibus',    km: route.transit.km, min: route.transit.min },
@@ -181,7 +182,7 @@ function ResultPanel({ employee, site, route, mode, setMode }) {
     <section style={resultStyles.wrap}>
       <div style={resultStyles.grid}>
         <div style={resultStyles.mapCol}>
-          <MapView from={employee} to={site} route={route} mode={mode} />
+          <MapView from={employee} to={site} route={route} mode={mode} apiKey={mapsJsKey} />
           <div style={resultStyles.modePills}>
             {modes.map(m => (
               <button

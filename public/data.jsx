@@ -20,4 +20,10 @@ async function fetchRoute(empId, workId) {
   return body.fallback || body
 }
 
-window.api = { fetchEmployees, fetchWorks, fetchRoute }
+async function fetchConfig() {
+  const res = await fetch('/api/config')
+  if (!res.ok) throw new Error(`config ${res.status}`)
+  return res.json()
+}
+
+window.api = { fetchEmployees, fetchWorks, fetchRoute, fetchConfig }

@@ -41,6 +41,7 @@ services:
       DATABASE_URL: postgresql://postgres@postgres:5432/postgres?schema=public
       PORT: 3000
       GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:-}
+      GOOGLE_MAPS_JS_API_KEY: ${GOOGLE_MAPS_JS_API_KEY:-}
       BUS_FARE_BRL: ${BUS_FARE_BRL:-5.00}
     ports:
       - '3000:3000'
@@ -54,7 +55,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    command: sh -c "npx prisma generate && npm run dev"
+    command: sh -c "npx prisma generate && npx prisma migrate deploy && npm run seed && npm run dev"
     networks:
       - app-network
     deploy:
