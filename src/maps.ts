@@ -26,7 +26,6 @@ export type RouteResponse = {
 }
 
 const ROUTES_URL = 'https://routes.googleapis.com/directions/v2:computeRoutes'
-const DIRECTIONS_URL = 'https://maps.googleapis.com/maps/api/directions/json'
 
 const FIELD_MASK = [
   'routes.duration',
@@ -36,6 +35,8 @@ const FIELD_MASK = [
   'routes.legs.steps.distanceMeters',
   'routes.legs.steps.navigationInstruction',
   'routes.legs.steps.travelMode',
+  'routes.polyline.encodedPolyline',
+  'routes.viewport',
 ].join(',')
 
 export function haversineKm(a: Coord, b: Coord): number {
@@ -107,7 +108,7 @@ export function mockRoute(from: employee, to: work, fareBRL: number): RouteRespo
   }
 }
 
-export function mockMapShape(from: employee, to: work): MapShape {
+function mockMapShape(from: employee, to: work): MapShape {
   const a: Coord = { lat: from.lat!, lng: from.lng! }
   const b: Coord = { lat: to.lat!, lng: to.lng! }
   return {
@@ -249,40 +250,15 @@ export async function googleTransitRoute(
     },
     ...other,
     steps,
-    map: null,
-  }
-}
-
-export async function googleDirectionsPolyline(
-  from: employee,
-  to: work,
-  apiKey: string,
-): Promise<MapShape> {
-  const params = new URLSearchParams({
-    origin: `${from.lat},${from.lng}`,
-    destination: `${to.lat},${to.lng}`,
-    mode: 'transit',
-    transit_mode: 'bus',
-    departure_time: 'now',
-    language: 'pt-BR',
-    region: 'br',
-    units: 'metric',
-    key: apiKey,
-  })
-  const res = await fetch(`${DIRECTIONS_URL}?${params.toString()}`)
-  if (!res.ok) throw new Error(`Directions HTTP ${res.status}`)
-  const data: any = await res.json()
-  if (data.status !== 'OK') {
-    throw new Error(`Directions ${data.status}: ${data.error_message ?? ''}`)
-  }
-  const r = data.routes?.[0]
-  if (!r) throw new Error('Directions returned no routes')
-  return {
-    polyline: r.overview_polyline.points,
-    bounds: {
-      ne: { lat: r.bounds.northeast.lat, lng: r.bounds.northeast.lng },
-      sw: { lat: r.bounds.southwest.lat, lng: r.bounds.southwest.lng },
-    },
-    source: 'google',
+    map: route.polyline?.encodedPolyline
+      ? {
+          polyline: route.polyline.encodedPolyline,
+          bounds: {
+            ne: { lat: route.viewport.high.latitude, lng: route.viewport.high.longitude },
+            sw: { lat: route.viewport.low.latitude, lng: route.viewport.low.longitude },
+          },
+          source: 'google',
+        }
+      : null,
   }
 }
