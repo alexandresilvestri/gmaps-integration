@@ -86,6 +86,10 @@ function mockSteps(origin: string, destinationName: string, totalKm: number, tot
   ]
 }
 
+function triFare(busTickets: number, fareBRL: number): number {
+  return +((busTickets === 2 ? 1.5 : busTickets) * fareBRL).toFixed(2)
+}
+
 export function mockRoute(from: employee, to: work, fareBRL: number): RouteResponse {
   const straight = haversineKm({ lat: from.lat!, lng: from.lng! }, { lat: to.lat!, lng: to.lng! })
   const transitKm = +(straight * 1.55).toFixed(1)
@@ -98,7 +102,7 @@ export function mockRoute(from: employee, to: work, fareBRL: number): RouteRespo
       km: transitKm,
       min: transitMin,
       busTickets,
-      fareEstimateBRL: +(busTickets * fareBRL).toFixed(2),
+      fareEstimateBRL: triFare(busTickets, fareBRL),
       transfers: Math.max(0, busTickets - 1),
       source: 'mock',
     },
@@ -184,7 +188,7 @@ export async function googleTransitRoute(
     origin: { location: { latLng: { latitude: from.lat, longitude: from.lng } } },
     destination: { location: { latLng: { latitude: to.lat, longitude: to.lng } } },
     travelMode: 'TRANSIT',
-    transitPreferences: { allowedTravelModes: ['BUS', 'RAIL'] },
+    transitPreferences: { allowedTravelModes: ['BUS'] },
     languageCode: 'pt-BR',
     units: 'METRIC',
   }
@@ -244,7 +248,7 @@ export async function googleTransitRoute(
       km: transitKm,
       min: transitMin,
       busTickets,
-      fareEstimateBRL: +(busTickets * fareBRL).toFixed(2),
+      fareEstimateBRL: triFare(busTickets, fareBRL),
       transfers,
       source: 'google',
     },

@@ -8,7 +8,7 @@ import { googleTransitRoute, mockRoute } from './maps.js'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const PUBLIC_DIR = path.resolve(__dirname, '../public')
 const PORT = Number(process.env.PORT) || 3000
-const FARE_BRL = Number(process.env.BUS_FARE_BRL) || 5.0
+const FARE_BRL = Number(process.env.BUS_FARE_BRL) || 5.3
 const API_KEY = process.env.GOOGLE_MAPS_API_KEY
 
 const app = express()

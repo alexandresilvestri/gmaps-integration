@@ -42,7 +42,7 @@ services:
       PORT: 3030
       GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:-}
       GOOGLE_MAPS_JS_API_KEY: ${GOOGLE_MAPS_JS_API_KEY:-}
-      BUS_FARE_BRL: ${BUS_FARE_BRL:-6.00}
+      BUS_FARE_BRL: ${BUS_FARE_BRL:-5.30}
     ports:
       - '3030:3030'
     volumes:
