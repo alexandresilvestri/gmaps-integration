@@ -9,5 +9,5 @@ First prototype (already connected to the Discovery and Routes APIs of Google Ma
 Bus cost uses Porto Alegre TRI card fares (`BUS_FARE_BRL`, default R$ 5,30) for a one-way trip:
 
 - 1 bus: 1 fare
-- 2 buses: 1.5 fares (TRI integration, 2nd bus at 50%)
+- 2 buses: 1.5 fares (TRI integration, 2nd bus at 50%), or 2 fares when both buses are the same line
 - 3+ buses: full fare for every bus, with no integration discount. This is an intentional decision.

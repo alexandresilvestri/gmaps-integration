@@ -86,8 +86,8 @@ function mockSteps(origin: string, destinationName: string, totalKm: number, tot
   ]
 }
 
-function triFare(busTickets: number, fareBRL: number): number {
-  return +((busTickets === 2 ? 1.5 : busTickets) * fareBRL).toFixed(2)
+function triFare(busTickets: number, fareBRL: number, sameLine = false): number {
+  return +((busTickets === 2 && !sameLine ? 1.5 : busTickets) * fareBRL).toFixed(2)
 }
 
 export function mockRoute(from: employee, to: work, fareBRL: number): RouteResponse {
@@ -178,6 +178,10 @@ function mapStepIcon(maneuver: string | undefined, travelMode: string | undefine
   return 'straight'
 }
 
+function lineName(s: RoutesApiStep) {
+  return s.transitDetails?.transitLine?.nameShort || s.transitDetails?.transitLine?.name
+}
+
 export async function googleTransitRoute(
   from: employee,
   to: work,
@@ -218,6 +222,8 @@ export async function googleTransitRoute(
   )
   const busTickets = busSteps.length || 0
   const transfers = Math.max(0, busTickets - 1)
+  const [lineA, lineB] = busSteps.map(lineName)
+  const sameLine = !!lineA && lineA === lineB
 
   const steps = allSteps.map((s, i) => {
     const isFirst = i === 0
@@ -226,7 +232,7 @@ export async function googleTransitRoute(
     const min = Math.round(parseDurationSeconds(s.staticDuration) / 60)
     let text = s.navigationInstruction?.instructions || ''
     if (s.transitDetails) {
-      const line = s.transitDetails.transitLine?.nameShort || s.transitDetails.transitLine?.name || 'Ônibus'
+      const line = lineName(s) || 'Ônibus'
       const dep = s.transitDetails.stopDetails?.departureStop?.name || ''
       const arr = s.transitDetails.stopDetails?.arrivalStop?.name || ''
       text = `Embarque na linha ${line}${dep ? ` em ${dep}` : ''}${arr ? ` até ${arr}` : ''}`
@@ -248,7 +254,7 @@ export async function googleTransitRoute(
       km: transitKm,
       min: transitMin,
       busTickets,
-      fareEstimateBRL: triFare(busTickets, fareBRL),
+      fareEstimateBRL: triFare(busTickets, fareBRL, sameLine),
       transfers,
       source: 'google',
     },
