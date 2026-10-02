@@ -8,7 +8,7 @@ services:
       POSTGRES_DB: postgres
       POSTGRES_HOST_AUTH_METHOD: trust
     ports:
-      - '${DB_PORT:-5432}:5432'
+      - '${DB_PORT:-5444}:5432'
     volumes:
       - postgres_data:/var/lib/postgresql
     healthcheck:
@@ -39,12 +39,12 @@ services:
       DB_USER: postgres
       DB_NAME: postgres
       DATABASE_URL: postgresql://postgres@postgres:5432/postgres?schema=public
-      PORT: 3010
+      PORT: 3030
       GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:-}
       GOOGLE_MAPS_JS_API_KEY: ${GOOGLE_MAPS_JS_API_KEY:-}
       BUS_FARE_BRL: ${BUS_FARE_BRL:-6.00}
     ports:
-      - '3010:3010'
+      - '3030:3030'
     volumes:
       - ./src:/app/src
       - ./prisma:/app/prisma
